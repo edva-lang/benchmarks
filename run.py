@@ -165,7 +165,7 @@ def compile_target(
         cmd = [bins["rust"], "-C", "opt-level=3", str(wdir / "rust.rs"), "-o", str(out_bin)]
         cwd = wdir
     elif lang == "zig":
-        cmd = [bins["zig"], "build-exe", "-OReleaseFast", f"-femit-bin={out_bin}", str(wdir / "zig.zig")]
+        cmd = [bins["zig"], "build-exe", "-OReleaseFast", "-lc", f"-femit-bin={out_bin}", str(wdir / "zig.zig")]
         cwd = wdir
     elif lang == "go":
         cmd = [bins["go"], "build", "-o", str(out_bin), str(wdir / "go.go")]
@@ -226,7 +226,7 @@ def render_readme(data: dict) -> str:
         f"| Edva | `{env['toolchains']['edva']}` | `edva build -O2 --no-cache` |",
         f"| Clang (C) | `{env['toolchains']['clang']}` | `clang -O2` |",
         f"| Rust | `{env['toolchains']['rust']}` | `rustc -C opt-level=3` |",
-        f"| Zig | `{env['toolchains']['zig']}` | `zig build-exe -OReleaseFast` |",
+        f"| Zig | `{env['toolchains']['zig']}` | `zig build-exe -OReleaseFast -lc` |",
         f"| Go | `{env['toolchains']['go']}` | `go build` |",
         "",
         "## Methodology",
