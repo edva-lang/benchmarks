@@ -17,7 +17,7 @@ n = parse_n_arg(16000)
 dump_alloc = sys::argc !< 3 && sys::argv_string(2) == "--alloc-stats"
 scratch = mem::arena(1048576)
 batches = n / 64
-eff_batches = batches > 0 | batches | 1
+eff_batches = %max(batches, 1)
 digest' = 0
 kept' = 0
 heavy' = 0
@@ -29,12 +29,12 @@ eff_batches @ b =>
    r = mem::with_value(scratch, !=> pipeline::run_batch(b))
    after_b = mem::provenance(scratch).bytes_allocated
    delta = after_b - before_b
-   delta > 0 | total_alloc_bytes' = total_alloc_bytes' + delta
-   after_b > peak_scratch_bytes' | peak_scratch_bytes' = after_b
+   total_alloc_bytes' = total_alloc_bytes' + %max(delta, 0)
+   peak_scratch_bytes' = %max(peak_scratch_bytes', after_b)
    digest' = (digest' * 131 + r.0) % 1000000007
    kept' = kept' + r.1
    heavy' = heavy' + r.2
-   (b % 16) == 15 | mem::reset(scratch)
+   (b .&. 15) == 15 | mem::reset(scratch)
 
 sp = mem::provenance(scratch)
 gp = mem::provenance(mem::global_arena!)

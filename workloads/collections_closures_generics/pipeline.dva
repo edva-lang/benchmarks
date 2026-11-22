@@ -40,33 +40,30 @@
       samples: Sample{}
       64 @ k =>
          idx = b_idx * 64 + k
-         gid = (idx * 7 + 3) % 8
+         gid = (idx * 7 + 3) .&. 7
          w = (idx * 31 + 17) % 251 + 1
-         tg = (idx * 13 + 5) % 16
+         tg = (idx * 13 + 5) .&. 15
          samples += Sample(idx, gid, w, tg)
 
       // 1. `@>` filter-map pipeline: keep samples with even group or tag >= 11, project to Pair
       filtered = samples @> (s =>
-         (s.group % 2 == 0) || (s.tag !< 11)
+         ((s.group .&. 1) == 0) || (s.tag !< 11)
             | <+ Pair(s.id % 997, s.weight * (s.group + 1)) +>
-            | <-->
       )
 
       // 2. `@>` map pipeline: score each Pair via higher-order composition
       scale_fn = x => (x * 3 + 7) % 10007
       shift_fn = x => (x + b_idx % 97 + 11) % 10007
-      scores = filtered @> (p =>
-         compose_twice(scale_fn, shift_fn, p.a + p.b)
-      )
+      scores = filtered @> compose_twice(scale_fn, shift_fn, _.a + _.b)
 
       // 3. `@>` seeded fold over scores
       fold_sum = (0, scores) @> (acc, sc => (acc * 33 + sc) % 1000000007)
 
       // 4. Generic fold + generic predicate count + generic optional transform
       weighted_sum = fold_generic(0, filtered, (acc, p => (acc + p.a * 5 + p.b * 3) % 1000000007))
-      heavy_cnt = count_matching(samples, (s => s.weight > 125))
-      opt_bonus = (heavy_cnt > 20) | <+ Pair(heavy_cnt, ?filtered) +> | <-->
-      bonus = transform_opt(opt_bonus, (p => p.a * 19 + p.b * 7), 13)
+      heavy_cnt = count_matching(samples, (_.weight > 125))
+      opt_bonus = (heavy_cnt > 20) | <+ Pair(heavy_cnt, ?filtered) +>
+      bonus = transform_opt(opt_bonus, (_.a * 19 + _.b * 7), 13)
 
       batch_digest = (fold_sum + weighted_sum * 17 + bonus) % 1000000007
       (batch_digest, ?filtered, heavy_cnt)
@@ -75,7 +72,7 @@
    run_pipeline_steps: Int => (Int, Int, Int)
    run_pipeline_steps = n =>
       batches = n / 64
-      eff_batches = batches > 0 | batches | 1
+      eff_batches = %max(batches, 1)
       digest' = 0
       kept' = 0
       heavy' = 0

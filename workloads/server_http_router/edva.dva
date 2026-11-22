@@ -20,24 +20,24 @@ parse_n_arg = dflt =>
 
 parse_http_req: String => < HttpReq | >
 parse_http_req = raw =>
-   hdr_end = str::find(raw, "\r\n\r\n") | p => p | --| <-->
+   hdr_end = str::find(raw, "\r\n\r\n") | _ |-->
    head = raw(0..hdr_end)
    body_raw = raw(hdr_end + 4..)
-   eol = str::find(head, "\r\n") | p => p | ?head
+   eol = str::find(head, "\r\n") | _ | ?head
    req_line = head(0..eol)
-   sp1 = str::find(req_line, " ") | p => p | --| <-->
+   sp1 = str::find(req_line, " ") | _ |-->
    method = req_line(0..sp1)
    rest1 = req_line(sp1 + 1..)
-   sp2 = str::find(rest1, " ") | p => p | ?rest1
+   sp2 = str::find(rest1, " ") | _ | ?rest1
    target = rest1(0..sp2)
-   q_pos = str::find(target, "?") | p => p | ?target
+   q_pos = str::find(target, "?") | _ | ?target
    path = target(0..q_pos)
    <+ HttpReq(method, path, body_raw) +>
 
 route_request: HttpReq => (Int, String)
 route_request = req =>
    req.method == "GET" && req.path == "/health"
-      | --| (200, "{\"status\":\"ok\"}")
+      | --| (200, """{"status":"ok"}""")
    req.method == "POST" && str::starts_with(req.path, "/items/")
       | --| (201, "created:${req.path(7..)}:${str::from_int(?req.body)}")
    req.method == "GET" && str::starts_with(req.path, "/users/")
@@ -47,8 +47,7 @@ route_request = req =>
 format_response: Int, String => String
 format_response = status, body =>
    b = {64 + ?body}
-   b += "HTTP/1.1 ${str::from_int(status)} OK\r\nContent-Length: ${str::from_int(?body)}\r\n\r\n"
-   b += body
+   b += "HTTP/1.1 ${str::from_int(status)} OK\r\nContent-Length: ${str::from_int(?body)}\r\n\r\n${body}"
    +b
 
 n = parse_n_arg(40000)
@@ -60,7 +59,7 @@ c404' = 0
 
 n @ i =>
    res = mem::with_value(req_arena, !=>
-      m = i % 4
+      m = i .&. 3
       raw = m
          [0] "GET /health HTTP/1.1\r\nHost: localhost\r\nConnection: keep-alive\r\n\r\n"
          [1] "POST /items/${str::from_int(i % 97)}?mode=fast HTTP/1.1\r\nHost: localhost\r\nContent-Length: 11\r\n\r\nhello=world"

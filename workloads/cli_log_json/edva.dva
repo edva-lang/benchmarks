@@ -26,7 +26,7 @@ n @ i =>
       lat = (i * 131 + 17) % 500 + 1
       is_ok = (i % 5) != 0
       ok_s = is_ok | "true" | "false"
-      line = "{\"id\":${str::from_int(id)},\"svc\":\"svc_${str::from_int(i % 4)}\",\"ok\":${ok_s},\"lat\":${str::from_int(lat)}}"
+      line = """{"id":${str::from_int(id)},"svc":"svc_${str::from_int(i .&. 3)}","ok":${ok_s},"lat":${str::from_int(lat)}}"""
       json::cursor_reset(cur, line)
       json::cursor_enter_object(cur)
          |
@@ -54,7 +54,7 @@ n @ i =>
    ok_cnt' = ok_cnt' + row.1
    err_cnt' = err_cnt' + row.2
    checksum' = (checksum' + row.0) % 1000000007
-   (i % 256) == 255 | mem::reset(scratch)
+   (i .&. 255) == 255 | mem::reset(scratch)
 
 mem::destroy(scratch)
 io::out $ "checksum=${str::from_int(checksum')},ok=${str::from_int(ok_cnt')},err=${str::from_int(err_cnt')}"
