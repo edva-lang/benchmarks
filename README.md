@@ -12,7 +12,7 @@ Reproducible native benchmarks comparing **Edva**, **Clang (C)**, **Rust**, **Zi
 | Edva | `edva 1.6.3+ade0ce7` | `edva --opt 2 --no-cache` |
 | Clang (C) | `clang version 21.1.8` | `clang -O2` |
 | Rust | `rustc 1.99.0 (b940084d7 2026-09-28) (built from a source tarball)` | `rustc -C opt-level=3` |
-| Zig | `zig 0.17.0` | `zig build-exe -OReleaseFast -lc` |
+| Zig | `zig 0.17.0` | `zig build-exe -OReleaseFast -lc -fstrip` |
 | Go | `go version go1.26.10 linux/amd64` | `go build` |
 
 ## Methodology
@@ -29,11 +29,11 @@ Unboxed 64-bit integer 8-body 3D kinematics step loop testing tight numeric code
 
 | Language | p50 (ms) | p95 (ms) | CoV (%) | Peak RSS (KiB) | Binary (KiB) | Cold Compile (ms) | Throughput |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| **edva** | 73.39 | 73.94 | 0.6 | 2064 | 78.3 | 366 | 5,450,420 steps/s |
-| **clang** | 72.87 | 73.66 | 0.7 | 2116 | 15.6 | 97 | 5,489,371 steps/s |
-| **rust** | 221.11 | 222.33 | 1.2 | 2064 | 517.5 | 212 | 1,809,069 steps/s |
-| **zig** | 72.93 | 73.31 | 0.4 | 1820 | 3683.6 | 10761 | 5,484,525 steps/s |
-| **go** | 264.92 | 276.10 | 1.8 | 2336 | 2373.1 | 98 | 1,509,900 steps/s |
+| **edva** | 73.16 | 73.81 | 0.5 | 2012 | 78.3 | 365 | 5,467,137 steps/s |
+| **clang** | 72.73 | 73.48 | 0.6 | 2116 | 15.6 | 96 | 5,499,626 steps/s |
+| **rust** | 219.05 | 221.75 | 0.7 | 2060 | 517.5 | 215 | 1,826,051 steps/s |
+| **zig** | 73.05 | 82.57 | 6.7 | 1828 | 185.3 | 2192 | 5,475,553 steps/s |
+| **go** | 267.48 | 275.59 | 1.8 | 2336 | 2373.1 | 104 | 1,495,469 steps/s |
 
 ### `server_http_router` — In-Memory HTTP/1.1 Router (`N = 200000` requests)
 
@@ -41,11 +41,11 @@ HTTP/1.1 request line, header, and query parsing, route matching (/health, /item
 
 | Language | p50 (ms) | p95 (ms) | CoV (%) | Peak RSS (KiB) | Binary (KiB) | Cold Compile (ms) | Throughput |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| **edva** | 20.56 | 20.73 | 3.9 | 4920 | 87.6 | 559 | 9,729,411 requests/s |
-| **clang** | 36.01 | 36.51 | 1.3 | 2068 | 15.6 | 96 | 5,554,296 requests/s |
-| **rust** | 35.45 | 36.05 | 1.2 | 2196 | 518.4 | 305 | 5,641,598 requests/s |
-| **zig** | 18.61 | 18.76 | 0.5 | 1888 | 3728.1 | 10947 | 10,747,507 requests/s |
-| **go** | 80.09 | 85.69 | 3.5 | 7776 | 2384.1 | 108 | 2,497,138 requests/s |
+| **edva** | 18.79 | 18.89 | 0.4 | 4972 | 87.6 | 548 | 10,646,854 requests/s |
+| **clang** | 35.67 | 36.50 | 2.0 | 2068 | 15.6 | 95 | 5,607,216 requests/s |
+| **rust** | 35.74 | 36.34 | 1.1 | 2260 | 518.4 | 308 | 5,596,522 requests/s |
+| **zig** | 18.30 | 18.34 | 0.4 | 1836 | 191.2 | 2317 | 10,927,717 requests/s |
+| **go** | 79.96 | 89.82 | 5.8 | 7976 | 2384.1 | 99 | 2,501,138 requests/s |
 
 ### `cli_log_json` — JSON Log Format & Parse (`N = 100000` records)
 
@@ -53,11 +53,11 @@ Deterministic JSON log record formatting, RFC 8259 parsing, and checksum aggrega
 
 | Language | p50 (ms) | p95 (ms) | CoV (%) | Peak RSS (KiB) | Binary (KiB) | Cold Compile (ms) | Throughput |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| **edva** | 10.90 | 10.97 | 0.5 | 5092 | 91.8 | 644 | 9,177,511 records/s |
-| **clang** | 13.81 | 13.99 | 0.9 | 2068 | 15.6 | 107 | 7,243,030 records/s |
-| **rust** | 13.39 | 13.43 | 0.5 | 2060 | 518.2 | 245 | 7,470,210 records/s |
-| **zig** | 29.41 | 29.85 | 0.8 | 2008 | 3891.5 | 11610 | 3,399,986 records/s |
-| **go** | 126.50 | 140.25 | 6.1 | 8492 | 2883.8 | 110 | 790,523 records/s |
+| **edva** | 11.08 | 11.26 | 1.1 | 5136 | 91.8 | 636 | 9,026,434 records/s |
+| **clang** | 14.33 | 15.97 | 6.3 | 2116 | 15.6 | 108 | 6,977,562 records/s |
+| **rust** | 13.36 | 13.66 | 1.1 | 2060 | 518.2 | 242 | 7,487,588 records/s |
+| **zig** | 29.38 | 30.01 | 1.0 | 1824 | 231.2 | 2864 | 3,403,707 records/s |
+| **go** | 124.80 | 139.44 | 6.2 | 8464 | 2883.8 | 112 | 801,265 records/s |
 
 ### `collections_closures_generics` — Collections, Closures & Generics (`N = 800000` items)
 
@@ -65,9 +65,9 @@ Batched filter-map, map, higher-order composition, and seeded fold pipelines ove
 
 | Language | p50 (ms) | p95 (ms) | CoV (%) | Peak RSS (KiB) | Binary (KiB) | Cold Compile (ms) | Throughput |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| **edva** | 11.95 | 12.13 | 0.8 | 3524 | 87.2 | 500 | 66,920,759 items/s |
-| **clang** | 8.98 | 9.00 | 0.2 | 2096 | 15.7 | 98 | 89,139,986 items/s |
-| **rust** | 11.53 | 11.60 | 0.3 | 2192 | 518.1 | 255 | 69,362,414 items/s |
-| **zig** | 8.89 | 8.95 | 0.5 | 2080 | 3762.4 | 11036 | 90,011,310 items/s |
-| **go** | 14.95 | 15.09 | 0.7 | 6432 | 2374.0 | 97 | 53,497,378 items/s |
+| **edva** | 11.96 | 12.11 | 1.9 | 3564 | 87.2 | 499 | 66,866,659 items/s |
+| **clang** | 8.99 | 9.01 | 0.1 | 2068 | 15.7 | 97 | 88,937,805 items/s |
+| **rust** | 11.56 | 11.78 | 0.9 | 2192 | 518.1 | 252 | 69,187,801 items/s |
+| **zig** | 8.92 | 9.07 | 0.8 | 1840 | 194.9 | 2491 | 89,704,211 items/s |
+| **go** | 14.79 | 15.09 | 1.2 | 6560 | 2374.0 | 99 | 54,106,816 items/s |
 

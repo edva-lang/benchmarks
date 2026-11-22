@@ -151,7 +151,7 @@ def compile_target [lang: string, wdir: string, out_bin: string, bins: record] {
             "edva" => (^($bins.edva) --opt 2 --no-cache -o $out_bin ($wdir | path join "edva.dva") | complete),
             "clang" => (^($bins.clang) -O2 ($wdir | path join "c.c") -lm -o $out_bin | complete),
             "rust" => (^($bins.rust) -C opt-level=3 ($wdir | path join "rust.rs") -o $out_bin | complete),
-            "zig" => (^($bins.zig) build-exe -OReleaseFast -lc $"-femit-bin=($out_bin)" ($wdir | path join "zig.zig") | complete),
+            "zig" => (^($bins.zig) build-exe -OReleaseFast -lc -fstrip $"-femit-bin=($out_bin)" ($wdir | path join "zig.zig") | complete),
             "go" => (^($bins.go) build -o $out_bin ($wdir | path join "go.go") | complete),
             _ => (error make { msg: $"unknown language: ($lang)" })
         }
@@ -206,7 +206,7 @@ def render_readme [data: record] {
         $"| Edva | `($tc.edva)` | `edva --opt 2 --no-cache` |"
         $"| Clang \(C\) | `($tc.clang)` | `clang -O2` |"
         $"| Rust | `($tc.rust)` | `rustc -C opt-level=3` |"
-        $"| Zig | `($tc.zig)` | `zig build-exe -OReleaseFast -lc` |"
+        $"| Zig | `($tc.zig)` | `zig build-exe -OReleaseFast -lc -fstrip` |"
         $"| Go | `($tc.go)` | `go build` |"
         ""
         "## Methodology"
